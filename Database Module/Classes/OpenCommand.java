@@ -9,9 +9,9 @@ import java.util.Scanner;
 public class OpenCommand implements Command {
 
     @Override
-    public StringBuilder execute(String[] args) throws FileNotFoundException {
+    public StringBuilder execute(String[] commandLine) throws FileNotFoundException {
         StringBuilder output = new StringBuilder("");
-        File openedFile = new File(args[0]);
+        File openedFile = new File(commandLine[1]);
 
         try (Scanner reader = new Scanner(openedFile)){
             while(reader.hasNextLine()){
