@@ -12,7 +12,7 @@ public class Row {
         this.columns = new HashMap<>();
     }
 
-    public void addFIeld(String columnName, DataField field){
+    public void addField(String columnName, DataField field){
         columns.put(columnName, field);
     }
 

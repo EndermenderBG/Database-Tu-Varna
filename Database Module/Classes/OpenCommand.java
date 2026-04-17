@@ -1,25 +1,66 @@
 package Classes;
 
 import Interfaces.Command;
+import Interfaces.DataField;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class OpenCommand implements Command {
 
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException {
+
         StringBuilder output = new StringBuilder("");
         File openedFile = new File(commandLine[1]);
 
+        Database database = Database.getInstance();
+        Integer rowNum = 1;
+        List<String> columnNames = new ArrayList<>();
+        boolean isColumnLine = true;
+
         try (Scanner reader = new Scanner(openedFile)){
             while(reader.hasNextLine()){
-                output.append(reader.nextLine());
+                String input = reader.nextLine();
+                String[] arr = input.split(" ");
+
+                if (isColumnLine){
+                    columnNames.addAll(Arrays.asList(arr));
+                    isColumnLine = false;
+                    continue;
+                }
+
+                Row row = new Row();
+                for (int i = 0; i < columnNames.toArray().length; i++){
+                    DataField dataField = createField(arr[i]);
+                    row.addField(columnNames.get(i), dataField);
+                }
+
+                database.addRow(rowNum.toString(), row);
+                rowNum++;
             }
+            output.append("File ").append(commandLine[1]).append(" successfully opened");
         } catch (FileNotFoundException e){
-            output.append("File Error \n");
+            throw new FileNotFoundException("File not found");
         }
         return output;
+    }
+
+    private DataField createField(String string){
+        DataField dataField;
+        if (string.matches("^[+-]?\\d+$")){
+            dataField = new IntField(Integer.parseInt(string));
+        }
+        else if (string.matches("[+-]?\\d*\\.?\\d+")){
+            dataField = new DoubleField(Double.parseDouble(string));
+        }
+        else {
+            dataField = new StringField(string);
+        }
+        return dataField;
     }
 }
