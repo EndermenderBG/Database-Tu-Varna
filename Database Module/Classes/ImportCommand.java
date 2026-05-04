@@ -33,10 +33,9 @@ public class OpenCommand implements Command {
                     isColumnLine = false;
                     continue;
                 }
-
                 Row row = new Row();
-                for (int i = 0; i < columnNames.toArray().length; i++){
-                    DataField dataField = createField(arr[i]);
+                for (int i = 0; i < columnNames.size(); i++){
+                    DataField dataField = createField(arr[i],columnNames.get(i));
                     row.addField(columnNames.get(i), dataField);
                 }
 
@@ -50,16 +49,20 @@ public class OpenCommand implements Command {
         return output;
     }
 
-    private DataField createField(String string){
+    private DataField createField(String string,String dataType){
         DataField dataField;
-        if (string.matches("^[+-]?\\d+$")){
+        String type = dataType.substring(dataType.indexOf("<")+1,dataType.lastIndexOf(">"));
+        if (type.equalsIgnoreCase("Int")){
             dataField = new IntField(Integer.parseInt(string));
         }
-        else if (string.matches("[+-]?\\d*\\.?\\d+")){
+        else if (type.equalsIgnoreCase("Double")){
             dataField = new DoubleField(Double.parseDouble(string));
         }
-        else {
+        else if (type.equalsIgnoreCase("String")) {
             dataField = new StringField(string);
+        }
+        else {
+            throw new RuntimeException("Invalid datatype");
         }
         return dataField;
     }
