@@ -11,8 +11,19 @@ public class Parser {
     private final Map<String, Command> commands = new HashMap<>();
 
     public Parser(){
-        commands.put("open", new OpenCommand());
+        commands.put("import", new ImportCommand());
         commands.put("help", new HelpCommand());
+        commands.put("open", new OpenCommand());
+        commands.put("exit", new ExitCommand());
+        commands.put("close", new CloseCommand());
+        commands.put("showtables", new ShowTablesCommand());
+        commands.put("describe", new DescribeCommand());
+        commands.put("print", new PrintCommand());
+    }
+    private static boolean isFileOpened = false;
+
+    public static void setFileOpened(boolean fileOpened) {
+        isFileOpened = fileOpened;
     }
 
     public Map<String, Command> getCommands() {
@@ -30,8 +41,8 @@ public class Parser {
             return false;
         }
     }
-
-    public StringBuilder start(Map<String, Command> commands) throws FileNotFoundException {
+    
+    public StringBuilder start(Map<String, Command> commands) throws FileNotFoundException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
         StringBuilder output = new StringBuilder();
         while (true){
@@ -45,8 +56,17 @@ public class Parser {
             Command command = commands.get(commandName);
 
             if (validateCommand(command)){
-                output = command.execute(parts);
-                return output;
+                if(isFileOpened) {
+                    output = command.execute(parts);
+                    return output;
+                } else if (commandName.equals("open") || commandName.equals("close") || commandName.equals("help")) {
+                    output = command.execute(parts);
+                    return output;
+                }
+                else {
+                    output.append("A file must be opened before using any other command.");
+                    return output;
+                }
             }
             else {
                 output.append("Unknown Command: ").append(commandName);

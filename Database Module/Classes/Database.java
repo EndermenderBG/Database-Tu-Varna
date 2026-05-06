@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Database {
-    private Map<String, Row> rows;
+    private Map<String, Table> tables;
 
     private static Database databaseInstance = null;
 
     public Database() {
-        this.rows = new HashMap<>();
+        this.tables = new HashMap<>();
     }
 
     public static synchronized Database getInstance(){
@@ -19,11 +19,23 @@ public class Database {
         return databaseInstance;
     }
 
-    public void addRow(String rowID, Row row){
-        rows.put(rowID, row);
+    public void addTable(Table table){
+        tables.put(table.getName(), table);
     }
 
-    public Row getRow(String rowID){
-        return rows.get(rowID);
+    public Table getTable(String tableName){
+        return tables.get(tableName);
+    }
+
+    public boolean checkDatabase(String tableName){
+        return tables.containsKey(tableName);
+    }
+
+    public static void databaseClear(){
+        databaseInstance = null;
+    }
+
+    public Map<String, Table> getTables() {
+        return tables;
     }
 }

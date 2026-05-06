@@ -5,20 +5,30 @@ import Interfaces.DataField;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-public class OpenCommand implements Command {
+public class ImportCommand implements Command {
 
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException {
 
         StringBuilder output = new StringBuilder("");
-        File openedFile = new File(commandLine[1]);
+        File openedFile = OpenCommand.getOpenedFile();
+        String fileName = openedFile.getName();
 
         Database database = Database.getInstance();
+        String tableName = commandLine[1].substring(0,commandLine[1].indexOf("."));
+        if(database.checkDatabase(tableName)){
+            output.append("This table has already been imported");
+            return output;
+        }
+        else if(!Objects.equals(commandLine[1], fileName)){
+            output.append("The file you have opened currently does not contain this table or the table does not exit. " +
+                            "The currently opened file contains contains table: ").append(tableName).append('\n')
+                    .append("Please import the correct table");
+            return output;
+        }
+        Table newTable = new Table(tableName);
         Integer rowNum = 1;
         List<String> columnNames = new ArrayList<>();
         boolean isColumnLine = true;
@@ -39,10 +49,11 @@ public class OpenCommand implements Command {
                     row.addField(columnNames.get(i), dataField);
                 }
 
-                database.addRow(rowNum.toString(), row);
+                newTable.addRow(rowNum.toString(), row);
                 rowNum++;
             }
-            output.append("File ").append(commandLine[1]).append(" successfully opened");
+            database.addTable(newTable);
+            output.append("Table from ").append(openedFile.getName()).append(" successfully imported");
         } catch (FileNotFoundException e){
             throw new FileNotFoundException("File not found");
         }
