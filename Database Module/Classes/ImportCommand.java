@@ -60,21 +60,24 @@ public class ImportCommand implements Command {
         return output;
     }
 
-    private DataField createField(String string,String dataType){
+    private DataField createField(String string, String dataType) {
+        if (string.equalsIgnoreCase("NULL")) {
+            return new NullField();
+        }
+
         DataField dataField;
-        String type = dataType.substring(dataType.indexOf("<")+1,dataType.lastIndexOf(">"));
-        if (type.equalsIgnoreCase("Int")){
+        String type = dataType.substring(dataType.indexOf("<") + 1, dataType.lastIndexOf(">"));
+
+        if (type.equalsIgnoreCase("Int")) {
             dataField = new IntField(Integer.parseInt(string));
-        }
-        else if (type.equalsIgnoreCase("Double")){
+        } else if (type.equalsIgnoreCase("Double")) {
             dataField = new DoubleField(Double.parseDouble(string));
-        }
-        else if (type.equalsIgnoreCase("String")) {
+        } else if (type.equalsIgnoreCase("String")) {
             dataField = new StringField(string);
-        }
-        else {
+        } else {
             throw new RuntimeException("Invalid datatype");
         }
+
         return dataField;
     }
 }

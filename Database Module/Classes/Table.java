@@ -16,6 +16,14 @@ public class Table {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Map<String, Row> getRows() {
+        return rows;
+    }
+
     public void addRow(String rowID, Row row){
         rows.put(rowID, row);
     }

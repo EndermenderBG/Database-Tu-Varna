@@ -19,8 +19,20 @@ public class Parser {
         commands.put("showtables", new ShowTablesCommand());
         commands.put("describe", new DescribeCommand());
         commands.put("print", new PrintCommand());
+        commands.put("save", new SaveCommand());
+        commands.put("export", new ExportCommand());
+        commands.put("select", new SelectCommand());
+        commands.put("addcolumn", new AddColumnCommand());
+        commands.put("update", new UpdateCommand());
+        commands.put("delete", new DeleteCommand());
+        commands.put("insert", new InsertCommand());
+        commands.put("innerjoin", new InnerJoinCommand());
+        commands.put("rename", new RenameCommand());
+        commands.put("count", new CountCommand());
+        commands.put("aggregate", new AggregateCommand());
     }
     private static boolean isFileOpened = false;
+    private static boolean executingPrint = false;
 
     public static void setFileOpened(boolean fileOpened) {
         isFileOpened = fileOpened;
@@ -41,6 +53,22 @@ public class Parser {
             return false;
         }
     }
+
+//    public StringBuilder printPager() throws FileNotFoundException, InterruptedException {
+//        Scanner scanner = new Scanner(System.in);
+//        StringBuilder output = new StringBuilder();
+//
+//        String input = scanner.nextLine().trim();
+//        String[] commandArr = input.split(" ");
+//
+//        if (commandArr[0] != "next" || commandArr[0] != "previous" || commandArr[0] != "exit"){
+//            output.append("Invalid command. You must use the <exit> command to exit the page view.");
+//            return output;
+//        }
+//
+//        output = commands.get("print").execute(commandArr);
+//        return output;
+//    }
     
     public StringBuilder start(Map<String, Command> commands) throws FileNotFoundException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
@@ -59,7 +87,8 @@ public class Parser {
                 if(isFileOpened) {
                     output = command.execute(parts);
                     return output;
-                } else if (commandName.equals("open") || commandName.equals("close") || commandName.equals("help")) {
+
+                } else if (commandName.equals("open") || commandName.equals("close") || commandName.equals("help") || commandName.equals("exit")) {
                     output = command.execute(parts);
                     return output;
                 }

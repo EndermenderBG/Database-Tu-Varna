@@ -12,6 +12,7 @@ public class Row {
         this.columns = new LinkedHashMap<>();
     }
 
+
     public void addField(String columnName, DataField field){
         columns.put(columnName, field);
     }
