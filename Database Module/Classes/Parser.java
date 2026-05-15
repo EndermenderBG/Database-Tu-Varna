@@ -1,5 +1,7 @@
 package Classes;
 
+import Classes.Commands.DatabaseCommands.*;
+import Classes.Commands.FileCommands.*;
 import Interfaces.Command;
 
 import java.io.FileNotFoundException;
