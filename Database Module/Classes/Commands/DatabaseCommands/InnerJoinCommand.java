@@ -12,7 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * InnerJoinCommand takes two tables and joins them based on matching values within 2 of their columns. It then creates a new table.
+ */
 public class InnerJoinCommand implements Command {
+    /**
+     * The execute command first validates the input, then it validates if the tables exist. After that it validates if the indexes for the columns are valid.
+     * After that it goes and compares the values of the 2 chosen columns. If they match, a new row is created with additional columns from both tables.
+     * Finally the new table is saved in the database.
+     * @param commandLine
+     * @return Notification containing the name of the new table if successful, throws an error otherwise.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();

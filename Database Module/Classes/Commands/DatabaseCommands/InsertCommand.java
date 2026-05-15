@@ -14,7 +14,18 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The InsertCommand allows the user to insert a row within the table.
+ */
 public class InsertCommand implements Command {
+    /**
+     * The execute method takes table name, rowID and new data for the row.
+     * It validates if the table name exists and then uses the rest of the input to add a row with an incremental ID.
+     * @param commandLine
+     * @return Notification if successful, throws an error if there is faulty input.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();
@@ -79,6 +90,12 @@ public class InsertCommand implements Command {
         return output;
     }
 
+    /**
+     * The createFields method filters what field should be created based on the column under which the field is found
+     * @param string
+     * @param dataType
+     * @return Returns a newly created appropriate object.
+     */
     private DataField createField(String string, String dataType) {
         if (string.equalsIgnoreCase("NULL")) {
             return new NullField();

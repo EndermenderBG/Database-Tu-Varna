@@ -1,0 +1,6 @@
+projects_EmpID<Int> projects_FirstName<String> projects_LastName<String> projects_Age<Int> projects_Department<String> projects_Salary<Double> projects_IsActive<String> exported_projects_ProjectID<Int> exported_projects_ProjectName<String> exported_projects_Budget<Double> exported_projects_EmpID<Int>
+1 Ivan Ivanov 28 IT 2500.5 Yes 101 WebsiteUpgrade 5000.0 1
+1 Ivan Ivanov 28 IT 2500.5 Yes 104 MobileApp 9500.0 1
+2 Maria Georgieva 35 HR 1800.0 Yes 102 RecruitmentDrive 1200.0 2
+3 Georgi Dimitrov 42 Finance 3200.75 NULL 103 TaxAudit 800.0 3
+4 Elena Petrova 29 IT 2650.0 Yes 105 ServerMigration 4500.0 4

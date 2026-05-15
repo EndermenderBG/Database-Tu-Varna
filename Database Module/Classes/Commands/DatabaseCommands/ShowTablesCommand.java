@@ -5,7 +5,16 @@ import Interfaces.Command;
 
 import java.io.FileNotFoundException;
 
+/**
+ * The ShowTablesCommand Outputs a list of all the tables in the database.
+ */
 public class ShowTablesCommand implements Command {
+    /**
+     * @param commandLine
+     * @return Return an ordered list of the tables.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         Database database = Database.getInstance();

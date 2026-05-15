@@ -8,7 +8,18 @@ import Interfaces.Command;
 import java.io.FileNotFoundException;
 import java.util.Map;
 
+/**
+ * THe AddColumnCommand adds a column to an already existing table and sets all values to null.
+ */
 public class AddColumnCommand implements Command {
+    /**
+     * The execute method within the AddColumnCommand class takes table name, column name and column typee as inputs.
+     * It validates input then simply adds a new column to every row map within the table with a NullField as value.
+     * @param commandLine
+     * @return
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();

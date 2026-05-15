@@ -7,7 +7,19 @@ import Interfaces.Command;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+/**
+ * The DescribeCommand outputs the columns and the type of field they input.
+ */
+
 public class DescribeCommand implements Command {
+    /**
+     * The execute method takes the table name as input.
+     * Gets the keys from the map of columns in the first row of the table, and the inputs them after throwing them into a list for indexing.
+     * @param commandLine
+     * @return Returns a numbered list of the columns and their types.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         Database database = Database.getInstance();

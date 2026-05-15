@@ -9,7 +9,18 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Map;
 
+/**
+ * The save command takes either a table or the currently opened file and then saves it in another file.
+ */
 public class SaveCommand implements Command {
+    /**
+     * If written as "save as" the command saves the table into another file.
+     * If written just as "save" it saves it into the currently opened file.
+     * @param commandLine
+     * @return A notification back to the user based on whether their table was successfully saved. Otherwise throws an error.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         if (commandLine.length >= 4 && commandLine[1].equalsIgnoreCase("as")) {
@@ -30,6 +41,12 @@ public class SaveCommand implements Command {
         }
     }
 
+    /**
+     * The performSave method takes a table from the database based on user input and writes it down within a file using the PrintWriter class.
+     * @param tableName
+     * @param file
+     * @return Notification if successful, throws an error otherwise.
+     */
     public static StringBuilder performSave(String tableName, File file) {
         Database database = Database.getInstance();
         if (!database.checkDatabase(tableName)) {

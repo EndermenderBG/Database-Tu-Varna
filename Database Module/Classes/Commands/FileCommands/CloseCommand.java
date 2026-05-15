@@ -5,7 +5,17 @@ import Interfaces.Command;
 
 import java.io.FileNotFoundException;
 
+/**
+ * The close command closes the file and deletes any information in the program.
+ */
 public class CloseCommand implements Command {
+    /**
+     * The execute method within the CloseCommand class simply validates if there's any file opened. If yes, it clears the database, if not it notifies the user.
+     * @param commandLine
+     * @return Notification if successful, throws an error otherwise.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output;

@@ -5,7 +5,18 @@ import Interfaces.Command;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+/**
+ * The export command borrows on the save command functioning identically to the "save as" version of it.
+ */
+
 public class ExportCommand implements Command {
+    /**
+     * It uses the performSave method to write a new file and then save it. All based on user input.
+     * @param commandLine
+     * @return Notification on success, throws an error on failure.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         if (commandLine.length < 3) {

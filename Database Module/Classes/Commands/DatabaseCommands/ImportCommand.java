@@ -15,8 +15,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class ImportCommand implements Command {
+/**
+ * The Import command takes the opened file as input and then inputs the data inside into the database.
+ */
 
+public class ImportCommand implements Command {
+    /**
+     * The execute method takes the information within the file, creates a new table,
+     * creates rows within the new table, fills them up with fields based on the columns at the top of the file
+     * and finally adds that table into the database.
+     * @param commandLine
+     * @return Notification if succcessful, throws error if not.
+     * @throws FileNotFoundException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException {
 
@@ -68,6 +79,12 @@ public class ImportCommand implements Command {
         return output;
     }
 
+    /**
+     * The createFields method filters what field should be created based on the column under which the field is found
+     * @param string
+     * @param dataType
+     * @return Returns a newly created appropriate object.
+     */
     private DataField createField(String string, String dataType) {
         if (string.equalsIgnoreCase("NULL")) {
             return new NullField();

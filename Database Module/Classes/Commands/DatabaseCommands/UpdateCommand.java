@@ -14,7 +14,18 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The UpdateCommand looks at a perticular field within the table and replaces it.
+ */
 public class UpdateCommand implements Command {
+    /**
+     * The execute command within the UpdateCommand class validates table then finds the perticular field based on user input.
+     * After finding it, it overwrites it with another again using user input.
+     * @param commandLine
+     * @return Notification if successful, throws an error otherwise.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();
@@ -73,6 +84,12 @@ public class UpdateCommand implements Command {
         return output;
     }
 
+    /**
+     * The createFields method filters what field should be created based on the column under which the field is found
+     * @param string
+     * @param dataType
+     * @return Returns a newly created appropriate object.
+     */
     private DataField createField(String string, String dataType) {
         if (string.equalsIgnoreCase("NULL")) {
             return new NullField();

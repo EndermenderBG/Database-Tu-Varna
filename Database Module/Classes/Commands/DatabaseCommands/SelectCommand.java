@@ -11,8 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The SelectCommand finds all rows within the table with a specific value and outputs it.
+ */
 public class SelectCommand implements Command {
-
+    /**
+     * Select takes as input a table name, a number of column and a value.
+     * It validates if all the inputs are correct then looks if a specific row has the supposed value.
+     * If it does, it outputs it.
+     * @param commandLine
+     * @return The conditions and rows that those conditions apply to.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         if (commandLine.length < 4) {

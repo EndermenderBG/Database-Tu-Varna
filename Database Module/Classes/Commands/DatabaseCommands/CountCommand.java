@@ -10,7 +10,19 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The CountCommand finds the number of rows within a table that contain a specific value.
+ */
+
 public class CountCommand implements Command {
+    /**
+     * The execute method within the CountCommand class takes a table name, column index and a value to find as input.
+     * It validates input, then it searches through the table if the value exists. If it does, it increments a counter.
+     * @param commandLine
+     * @return The conditions and the count to say how many times it contains the value.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();

@@ -12,7 +12,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The DeleteCommand class allows the user to delete a row within the table with a specfic value.
+ */
+
 public class DeleteCommand implements Command {
+    /**
+     * The execute command within the DeleteCommand class takes an index of a column and a value as input.
+     * If it finds the value in the given column, the row the value is found in is deleted.
+     * If it does not find the column or the value it throws an error.
+     * @param commandLine
+     * @return Notification if successful, throws an error otherwise.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();

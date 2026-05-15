@@ -2,6 +2,9 @@ package Classes.Commands.FileCommands;
 
 import Interfaces.Command;
 
+/**
+ * The HelpCommand class outputs the user a list of all the commands and how to use them.
+ */
 public class HelpCommand implements Command {
     private final StringBuilder output = new StringBuilder("The following commands are supported: \n" +
             "open <file> - opens <file>\n" +
@@ -25,6 +28,11 @@ public class HelpCommand implements Command {
             "count <table name> <search column n> <search value> - counts the number of rows matching the search criteria\n" +
             "aggregate <table name> <search column n> <search value> <target column n> <operation> - performs an operation (sum, product, maximum, minimum) on a target column for matching rows");
 
+    /**
+     *
+     * @param commandLine
+     * @return The list of commands and instructions.
+     */
     @Override
     public StringBuilder execute(String[] commandLine) {
         return output;

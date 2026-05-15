@@ -1,0 +1,7 @@
+EmpID<Int> FirstName<String> LastName<String> Age<Int> Department<String> Salary<Double>
+1 Ivan Ivanov 28 IT 2500.50
+2 Maria Georgieva 35 HR 1800.00
+3 Georgi Dimitrov 42 Finance 3200.75
+4 Elena Petrova 29 IT 2650.00
+5 Stefan Kolev 50 Management 5000.00
+6 Anna Popova 35 HR 1900.50

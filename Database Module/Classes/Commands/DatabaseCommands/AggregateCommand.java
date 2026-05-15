@@ -10,7 +10,19 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The AggregateCommand finds the Max, Min, Mul and Sum of 2 fields within a table.
+ */
 public class AggregateCommand implements Command {
+    /**
+     * The execute method within the AggregateCommand class takes a table name, 2 column indexes, 2 field values and a mathematical operation within those columns as input.
+     * It validates input first. First by making sure the input exists within the tables, and second making sure the input can support mathematical operations.
+     * After all that it calculates every operation. Finally it outputs the desired result based on which operation was chosen.
+     * @param commandLine
+     * @return The conditions and result of the mathematical operation.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();

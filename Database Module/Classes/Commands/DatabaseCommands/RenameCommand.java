@@ -6,11 +6,20 @@ import Interfaces.Command;
 
 import java.io.FileNotFoundException;
 
+/**
+ * The RenameCommand changes the name of a certain table given as an input by the user.
+ */
 public class RenameCommand implements Command {
+    /**
+     * Validates if the table exists and if the user has inputted both the correct old name and a new name. Then simply uses as setter method to apply the new name.
+     * @param commandLine
+     * @return Notification upon success, throws an error upon failure.
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
     @Override
     public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();
-
         if (commandLine.length < 3) {
             return output.append("Invalid arguments. Usage: rename <old name> <new name>");
         }
