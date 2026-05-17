@@ -1,0 +1,6 @@
+ID<Int> Name<String> DepartmentID<Int> Salary<Double>
+1 Alice 10 5000.0
+2 Bob 20 6000.5
+3 Charlie 10 4500.0
+4 David 30 7000.0
+5 Eva NULL 5500.0
