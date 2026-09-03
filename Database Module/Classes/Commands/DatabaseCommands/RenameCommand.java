@@ -18,7 +18,7 @@ public class RenameCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();
         if (commandLine.length < 3) {
             return output.append("Invalid arguments. Usage: rename <old name> <new name>");

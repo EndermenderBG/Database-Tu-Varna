@@ -1,5 +1,6 @@
 package Classes.Commands.FileCommands;
 
+import Classes.Structure.Database.Database;
 import Interfaces.Command;
 
 /**
@@ -34,7 +35,7 @@ public class HelpCommand implements Command {
      * @return The list of commands and instructions.
      */
     @Override
-    public StringBuilder execute(String[] commandLine) {
+    public StringBuilder execute(Database database, String[] commandLine) {
         return output;
     }
 }

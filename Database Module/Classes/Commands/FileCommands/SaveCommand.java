@@ -22,7 +22,7 @@ public class SaveCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
         if (commandLine.length >= 4 && commandLine[1].equalsIgnoreCase("as")) {
             String tableName = commandLine[2];
             String fileName = commandLine[3];

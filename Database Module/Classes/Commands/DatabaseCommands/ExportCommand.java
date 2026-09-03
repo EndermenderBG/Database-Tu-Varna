@@ -1,6 +1,7 @@
 package Classes.Commands.DatabaseCommands;
 
 import Classes.Commands.FileCommands.SaveCommand;
+import Classes.Structure.Database.Database;
 import Interfaces.Command;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,7 +19,7 @@ public class ExportCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
         if (commandLine.length < 3) {
             return new StringBuilder("Error: Invalid arguments. Use: export <table name> <file name>");
         }

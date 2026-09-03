@@ -2,6 +2,7 @@ package Classes.Commands.FileCommands;
 
 
 import Classes.Parser;
+import Classes.Structure.Database.Database;
 import Interfaces.Command;
 
 import java.io.File;
@@ -20,7 +21,7 @@ public class OpenCommand implements Command {
      * @throws FileNotFoundException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException {
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException {
         StringBuilder output;
         openedFile = new File(commandLine[1]);
         if(openedFile.exists()){

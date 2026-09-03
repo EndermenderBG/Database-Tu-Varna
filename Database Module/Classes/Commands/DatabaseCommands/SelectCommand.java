@@ -25,7 +25,7 @@ public class SelectCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
         if (commandLine.length < 4) {
             return new StringBuilder("Error: Invalid arguments. Usage: select <column-n> <value> <table name>");
         }

@@ -16,7 +16,7 @@ public class ShowTablesCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
         Database database = Database.getInstance();
         int num_of_tables = 1;
 

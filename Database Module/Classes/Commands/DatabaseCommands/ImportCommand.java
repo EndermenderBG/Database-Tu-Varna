@@ -29,7 +29,7 @@ public class ImportCommand implements Command {
      * @throws FileNotFoundException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException {
 
         StringBuilder output = new StringBuilder("");
         File openedFile = OpenCommand.getOpenedFile();

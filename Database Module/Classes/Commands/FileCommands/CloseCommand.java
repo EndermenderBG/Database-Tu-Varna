@@ -17,7 +17,7 @@ public class CloseCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output;
         if(OpenCommand.getOpenedFile() == null){
             output = new StringBuilder("You have not opened any file yet.");

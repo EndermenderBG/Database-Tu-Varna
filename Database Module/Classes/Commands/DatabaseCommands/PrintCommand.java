@@ -27,7 +27,7 @@ public class PrintCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder();
         Database database = Database.getInstance();
 

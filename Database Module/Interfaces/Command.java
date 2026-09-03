@@ -1,5 +1,7 @@
 package Interfaces;
 
+import Classes.Structure.Database.Database;
+
 import java.io.FileNotFoundException;
 
 
@@ -14,5 +16,5 @@ public interface Command {
      * @throws FileNotFoundException
      * @throws InterruptedException
      */
-    StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException;
+    StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException;
 }

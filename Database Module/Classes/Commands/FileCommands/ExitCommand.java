@@ -1,5 +1,6 @@
 package Classes.Commands.FileCommands;
 
+import Classes.Structure.Database.Database;
 import Interfaces.Command;
 
 import java.io.FileNotFoundException;
@@ -18,7 +19,7 @@ public class ExitCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(String[] commandLine) throws FileNotFoundException, InterruptedException {
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
         StringBuilder output = new StringBuilder("Program successfully disabled");
         System.out.println(output);
         try {
