@@ -24,76 +24,43 @@ public class SelectCommand implements Command {
      * @throws FileNotFoundException
      * @throws InterruptedException
      */
-    @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        if (commandLine.length < 4) {
-            return new StringBuilder("Error: Invalid arguments. Usage: select <column-n> <value> <table name>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 4) {
+            throw new IllegalArgumentException("Invalid number of arguments for select command. Expected 4, got " + commandLine.length + ".");
         }
 
-        int columnIndex;
-        try {
-            columnIndex = Integer.parseInt(commandLine[1]) - 1;
-        } catch (NumberFormatException e) {
-            return new StringBuilder("Error: <column-n> must be a valid integer number representing the column index.");
+        String tableName = commandLine[1];
+        String columnName = commandLine[2];
+        String value = commandLine[3];
+
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        String targetValue = commandLine[2];
-        String tableName = commandLine[3];
-
-        Database database = Database.getInstance();
-
-        if (!database.checkDatabase(tableName)) {
-            return new StringBuilder("Error: Table '" + tableName + "' does not exist. Call <showtables> to view active tables.");
+        int columnIndex = table.getColumnIndex(columnName);
+        if (columnIndex == -1) {
+            throw new IllegalArgumentException("Column with name " + columnName + " not found in table " + tableName + ".");
         }
 
-        Table table = database.getTable(tableName);
-        Map<String, Row> rowsMap = table.getRows();
-
-        if (rowsMap == null || rowsMap.isEmpty()) {
-            return new StringBuilder("Table '" + tableName + "' is currently empty.");
-        }
+        String columnType = table.getColumnType(columnIndex);
+        DataField targetField = DataField.createField(columnType, value);
 
         StringBuilder output = new StringBuilder();
-        output.append("\n=== Select Results for Table: ").append(tableName).append(" ===\n");
-        output.append("Condition: Column ").append(columnIndex + 1).append(" == '").append(targetValue).append("'\n\n");
+        int matchCount = 0;
 
-        Row firstRow = table.getRow("1");
-        List<String> headers = new ArrayList<>();
-        if (firstRow != null) {
-            headers.addAll(firstRow.getColumns().keySet());
-        }
-
-        if (columnIndex < 0 || columnIndex >= headers.size()) {
-            return new StringBuilder("Error: Column index " + (columnIndex + 1) + " is out of bounds. Table has " + headers.size() + " columns.");
-        }
-
-        String targetColumnName = headers.get(columnIndex);
-
-        for (String header : headers) {
-            output.append(String.format("%-20s", header));
-        }
-        output.append("\n");
-        output.append("-".repeat(headers.size() * 20)).append("\n");
-
-        boolean foundMatch = false;
-
-        for (Row row : rowsMap.values()) {
-            DataField targetField = row.getField(targetColumnName);
-
-            if (targetField != null && targetField.getAsString().equals(targetValue)) {
-                foundMatch = true;
-                for (DataField field : row.getColumns().values()) {
-                    output.append(String.format("%-20s", field.getAsString()));
-                }
-                output.append("\n");
+        for (int i = 0; i < table.getRowCount(); i++) {
+            Row row = table.getRow(i);
+            DataField field = row.getField(columnIndex);
+            if (field.compareTo(targetField) == 0) {
+                output.append(row.toString()).append(System.lineSeparator());
+                matchCount++;
             }
         }
 
-        if (!foundMatch) {
-            output.append("No rows matched the condition.\n");
+        if (matchCount == 0) {
+            return new StringBuilder("No matching records found in table ").append(tableName).append(".");
         }
-
-        output.append("=== End of Results ===");
 
         return output;
     }

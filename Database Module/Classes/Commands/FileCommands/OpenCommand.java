@@ -26,7 +26,6 @@ public class OpenCommand implements Command {
         openedFile = new File(commandLine[1]);
         if(openedFile.exists()){
             output = new StringBuilder("You have successfully opened the file");
-            Parser.setFileOpened(true);
             return output;
         }
         else{

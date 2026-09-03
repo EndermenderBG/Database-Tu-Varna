@@ -27,58 +27,38 @@ public class DeleteCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 4) {
-            return output.append("Invalid arguments. Usage: delete <table name> <search column n> <search value>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 4) {
+            throw new IllegalArgumentException("Invalid number of arguments for delete command. Expected 4, got " + commandLine.length + ".");
         }
 
         String tableName = commandLine[1];
-        int searchColIndex;
+        String columnName = commandLine[2];
+        String value = commandLine[3];
 
-        try {
-            searchColIndex = Integer.parseInt(commandLine[2]);
-        } catch (NumberFormatException e) {
-            return output.append("Column index must be an integer.");
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        String searchValue = commandLine[3];
-
-        Database database = Database.getInstance();
-        if (!database.checkDatabase(tableName)) {
-            return output.append("Table ").append(tableName).append(" does not exist.");
+        int columnIndex = table.getColumnIndex(columnName);
+        if (columnIndex == -1) {
+            throw new IllegalArgumentException("Column with name " + columnName + " not found in table " + tableName + ".");
         }
 
-        Table table = database.getTable(tableName);
+        String columnType = table.getColumnType(columnIndex);
+        DataField targetField = DataField.createField(columnType, value);
 
-        if (table.getRows().isEmpty()) {
-            return output.append("The table is empty, no deletions can be made.");
-        }
-
-        Row firstRow = table.getRows().values().iterator().next();
-        List<String> columnKeys = new ArrayList<>(firstRow.getColumns().keySet());
-
-        if (searchColIndex < 1 || searchColIndex > columnKeys.size()) {
-            return output.append("Column index out of bounds.");
-        }
-
-        String searchColKey = columnKeys.get(searchColIndex - 1);
         int deletedCount = 0;
-
-        Iterator<Map.Entry<String, Row>> iterator = table.getRows().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Row> entry = iterator.next();
-            Row row = entry.getValue();
-            DataField searchField = row.getField(searchColKey);
-
-            if (searchField != null && searchField.getAsString().equals(searchValue)) {
-                iterator.remove();
+        for (int i = table.getRowCount() - 1; i >= 0; i--) {
+            Row row = table.getRow(i);
+            DataField field = row.getField(columnIndex);
+            if (field.compareTo(targetField) == 0) {
+                table.deleteRow(i);
                 deletedCount++;
             }
         }
 
-        output.append("Successfully deleted ").append(deletedCount).append(" rows from table ").append(tableName).append(".");
-        return output;
+        return new StringBuilder("Successfully deleted ").append(deletedCount).append(" row(s) from table ").append(tableName).append(".");
     }
 }

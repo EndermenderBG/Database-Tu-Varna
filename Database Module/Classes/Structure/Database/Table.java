@@ -33,6 +33,10 @@ public class Table {
         return -1;
     }
 
+    public String getColumnType(int colIndex){
+        return columns.get(colIndex).getType();
+    }
+
     public void insertRow(Row row){
         if(row.size() != columns.size()){
             throw new IllegalArgumentException("Row width does not match column amount.");

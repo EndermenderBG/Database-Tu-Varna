@@ -27,83 +27,48 @@ public class UpdateCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 6) {
-            return output.append("Invalid arguments. Usage: update <table name> <search column n> <search value> <target column n> <target value>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 6) {
+            throw new IllegalArgumentException("Invalid number of arguments for update command. Expected 6, got " + commandLine.length + ".");
         }
 
         String tableName = commandLine[1];
-        int searchColIndex;
-        int targetColIndex;
+        String targetColumnName = commandLine[2];
+        String targetValue = commandLine[3];
+        String conditionColumnName = commandLine[4];
+        String conditionValue = commandLine[5];
 
-        try {
-            searchColIndex = Integer.parseInt(commandLine[2]);
-            targetColIndex = Integer.parseInt(commandLine[4]);
-        } catch (NumberFormatException e) {
-            return output.append("Column indices must be integers.");
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        String searchValue = commandLine[3];
-        String targetValue = commandLine[5];
-
-        Database database = Database.getInstance();
-        if (!database.checkDatabase(tableName)) {
-            return output.append("Table ").append(tableName).append(" does not exist.");
+        int targetColumnIndex = table.getColumnIndex(targetColumnName);
+        if (targetColumnIndex == -1) {
+            throw new IllegalArgumentException("Column with name " + targetColumnName + " not found in table " + tableName + ".");
         }
 
-        Table table = database.getTable(tableName);
-
-        Row firstRow = table.getRow("1");
-        if (firstRow == null) {
-            return output.append("The table is empty, no updates can be made.");
+        int conditionColumnIndex = table.getColumnIndex(conditionColumnName);
+        if (conditionColumnIndex == -1) {
+            throw new IllegalArgumentException("Column with name " + conditionColumnName + " not found in table " + tableName + ".");
         }
 
-        List<String> columnKeys = new ArrayList<>(firstRow.getColumns().keySet());
-        if (searchColIndex < 1 || searchColIndex > columnKeys.size() || targetColIndex < 1 || targetColIndex > columnKeys.size()) {
-            return output.append("Column index out of bounds.");
-        }
+        String targetColumnType = table.getColumnType(targetColumnIndex);
+        DataField newField = DataField.createField(targetColumnType, targetValue);
 
-        String searchColKey = columnKeys.get(searchColIndex - 1);
-        String targetColKey = columnKeys.get(targetColIndex - 1);
+        String conditionColumnType = table.getColumnType(conditionColumnIndex);
+        DataField matchField = DataField.createField(conditionColumnType, conditionValue);
 
         int updatedCount = 0;
-
-        for (Row row : table.getRows().values()) {
-            DataField searchField = row.getField(searchColKey);
-
-            if (searchField != null && searchField.getAsString().equals(searchValue)) {
-                DataField newField = createField(targetValue, targetColKey);
-                row.addField(targetColKey, newField);
+        for (int i = 0; i < table.getRowCount(); i++) {
+            Row row = table.getRow(i);
+            DataField conditionField = row.getField(conditionColumnIndex);
+            if (conditionField.compareTo(matchField) == 0) {
+                row.setField(targetColumnIndex, newField);
                 updatedCount++;
             }
         }
 
-        output.append("Successfully updated ").append(updatedCount).append(" rows in table ").append(tableName).append(".");
-        return output;
-    }
-
-    /**
-     * The createFields method filters what field should be created based on the column under which the field is found
-     * @param string
-     * @param dataType
-     * @return Returns a newly created appropriate object.
-     */
-    private DataField createField(String string, String dataType) {
-        if (string.equalsIgnoreCase("NULL")) {
-            return new NullField();
-        }
-
-        String type = dataType.substring(dataType.indexOf("<") + 1, dataType.lastIndexOf(">"));
-        if (type.equalsIgnoreCase("Int")) {
-            return new IntField(Integer.parseInt(string));
-        } else if (type.equalsIgnoreCase("Double")) {
-            return new DoubleField(Double.parseDouble(string));
-        } else if (type.equalsIgnoreCase("String")) {
-            return new StringField(string);
-        } else {
-            throw new RuntimeException("Invalid datatype: " + type);
-        }
+        return new StringBuilder("Successfully updated ").append(updatedCount).append(" row(s) in table ").append(tableName).append(".");
     }
 }

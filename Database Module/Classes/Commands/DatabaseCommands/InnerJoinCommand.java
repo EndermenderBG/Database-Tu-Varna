@@ -26,92 +26,58 @@ public class InnerJoinCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 5) {
-            return output.append("Invalid arguments. Usage: innerjoin <table 1> <column n1> <table 2> <column n2>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 5) {
+            throw new IllegalArgumentException("Invalid number of arguments for innerjoin command. Expected 5, got " + commandLine.length + ".");
         }
 
         String table1Name = commandLine[1];
+        String column1Name = commandLine[2];
         String table2Name = commandLine[3];
-        int col1Index;
-        int col2Index;
+        String column2Name = commandLine[4];
 
-        try {
-            col1Index = Integer.parseInt(commandLine[2]);
-            col2Index = Integer.parseInt(commandLine[4]);
-        } catch (NumberFormatException e) {
-            return output.append("Column indices must be integers.");
+        Table table1 = database.getTable(database.getTableIndex(table1Name));
+        if (table1 == null) {
+            throw new IllegalArgumentException("Table with name " + table1Name + " not found.");
         }
 
-        Database database = Database.getInstance();
-
-        if (!database.checkDatabase(table1Name)) {
-            return output.append("Table ").append(table1Name).append(" does not exist.");
-        }
-        if (!database.checkDatabase(table2Name)) {
-            return output.append("Table ").append(table2Name).append(" does not exist.");
+        Table table2 = database.getTable(database.getTableIndex(table2Name));
+        if (table2 == null) {
+            throw new IllegalArgumentException("Table with name " + table2Name + " not found.");
         }
 
-        Table table1 = database.getTable(table1Name);
-        Table table2 = database.getTable(table2Name);
-
-        if (table1.getRows().isEmpty() || table2.getRows().isEmpty()) {
-            return output.append("One or both tables are empty. Cannot perform Inner Join without a defined schema.");
+        int column1Index = table1.getColumnIndex(column1Name);
+        if (column1Index == -1) {
+            throw new IllegalArgumentException("Column with name " + column1Name + " not found in table " + table1Name + ".");
         }
 
-        Row firstRowT1 = table1.getRows().values().iterator().next();
-        List<String> columnKeysT1 = new ArrayList<>(firstRowT1.getColumns().keySet());
-
-        Row firstRowT2 = table2.getRows().values().iterator().next();
-        List<String> columnKeysT2 = new ArrayList<>(firstRowT2.getColumns().keySet());
-
-        if (col1Index < 1 || col1Index > columnKeysT1.size()) {
-            return output.append("Column index out of bounds for table ").append(table1Name).append(".");
-        }
-        if (col2Index < 1 || col2Index > columnKeysT2.size()) {
-            return output.append("Column index out of bounds for table ").append(table2Name).append(".");
+        int column2Index = table2.getColumnIndex(column2Name);
+        if (column2Index == -1) {
+            throw new IllegalArgumentException("Column with name " + column2Name + " not found in table " + table2Name + ".");
         }
 
-        String searchColKeyT1 = columnKeysT1.get(col1Index - 1);
-        String searchColKeyT2 = columnKeysT2.get(col2Index - 1);
+        StringBuilder output = new StringBuilder();
+        int matchCount = 0;
 
-        String newTableName = table1Name + "_join_" + table2Name + "_" + UUID.randomUUID().toString().substring(0, 4);
-        Table joinedTable = new Table(newTableName);
+        for (int i = 0; i < table1.getRowCount(); i++) {
+            Row row1 = table1.getRow(i);
+            DataField field1 = row1.getField(column1Index);
 
-        int rowIdCounter = 1;
+            for (int j = 0; j < table2.getRowCount(); j++) {
+                Row row2 = table2.getRow(j);
+                DataField field2 = row2.getField(column2Index);
 
-        for (Row r1 : table1.getRows().values()) {
-            DataField field1 = r1.getField(searchColKeyT1);
-            if (field1 == null || field1.getAsString().equals("NULL")) continue;
-
-            for (Row r2 : table2.getRows().values()) {
-                DataField field2 = r2.getField(searchColKeyT2);
-                if (field2 == null || field2.getAsString().equals("NULL")) continue;
-
-                if (field1.getAsString().equals(field2.getAsString())) {
-                    Row combinedRow = new Row();
-
-                    for (Map.Entry<String, DataField> entry : r1.getColumns().entrySet()) {
-                        String newColName = table1Name + "_" + entry.getKey();
-                        combinedRow.addField(newColName, entry.getValue());
-                    }
-
-                    for (Map.Entry<String, DataField> entry : r2.getColumns().entrySet()) {
-                        String newColName = table2Name + "_" + entry.getKey();
-                        combinedRow.addField(newColName, entry.getValue());
-                    }
-
-                    joinedTable.addRow(String.valueOf(rowIdCounter++), combinedRow);
+                if (field1.compareTo(field2) == 0) {
+                    output.append(row1.toString()).append(" | ").append(row2.toString()).append(System.lineSeparator());
+                    matchCount++;
                 }
             }
         }
 
-        database.addTable(joinedTable);
+        if (matchCount == 0) {
+            return new StringBuilder("No matching records found for inner join.");
+        }
 
-        output.append("Inner Join successful. Created new table: ").append(newTableName)
-                .append(" with ").append(rowIdCounter - 1).append(" rows.");
         return output;
     }
 }

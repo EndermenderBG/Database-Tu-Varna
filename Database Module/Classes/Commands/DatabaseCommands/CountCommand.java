@@ -24,57 +24,39 @@ public class CountCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 4) {
-            return output.append("Invalid arguments. Usage: count <table name> <search column n> <search value>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 4) {
+            throw new IllegalArgumentException("Invalid number of arguments for count command. Expected 4, got " + commandLine.length + ".");
         }
 
         String tableName = commandLine[1];
-        int searchColIndex;
+        String columnName = commandLine[2];
+        String value = commandLine[3];
 
-        try {
-            searchColIndex = Integer.parseInt(commandLine[2]);
-        } catch (NumberFormatException e) {
-            return output.append("Column index must be an integer.");
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        String searchValue = commandLine[3];
-
-        Database database = Database.getInstance();
-
-        if (!database.checkDatabase(tableName)) {
-            return output.append("Table ").append(tableName).append(" does not exist.");
+        int columnIndex = table.getColumnIndex(columnName);
+        if (columnIndex == -1) {
+            throw new IllegalArgumentException("Column with name " + columnName + " not found in table " + tableName + ".");
         }
 
-        Table table = database.getTable(tableName);
+        String columnType = table.getColumnType(columnIndex);
+        DataField targetField = DataField.createField(columnType, value);
 
-        if (table.getRows().isEmpty()) {
-            return output.append("The table is empty. Found 0 rows matching the value '").append(searchValue).append("'.");
-        }
-
-        Row firstRow = table.getRows().values().iterator().next();
-        List<String> columnKeys = new ArrayList<>(firstRow.getColumns().keySet());
-
-        if (searchColIndex < 1 || searchColIndex > columnKeys.size()) {
-            return output.append("Column index out of bounds.");
-        }
-
-        String searchColKey = columnKeys.get(searchColIndex - 1);
         int matchCount = 0;
 
-        for (Row row : table.getRows().values()) {
-            DataField searchField = row.getField(searchColKey);
+        for (int i = 0; i < table.getRowCount(); i++) {
+            Row row = table.getRow(i);
+            DataField field = row.getField(columnIndex);
 
-            if (searchField != null && searchField.getAsString().equals(searchValue)) {
+            if (field.compareTo(targetField) == 0) {
                 matchCount++;
             }
         }
 
-        output.append("Found ").append(matchCount).append(" row(s) in table ").append(tableName)
-                .append(" where column ").append(searchColIndex).append(" equals '").append(searchValue).append("'.");
-
-        return output;
+        return new StringBuilder("Counted ").append(matchCount).append(" row(s) matching the criteria in table ").append(tableName).append(".");
     }
 }
