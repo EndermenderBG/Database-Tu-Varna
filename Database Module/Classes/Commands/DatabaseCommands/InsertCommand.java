@@ -27,89 +27,36 @@ public class InsertCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 3) {
-            return output.append("Invalid arguments. Usage: insert <table name> <value 1> <value 2> ... <value n>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length < 2) {
+            throw new IllegalArgumentException("Invalid number of arguments for insert command.");
         }
 
         String tableName = commandLine[1];
-        Database database = Database.getInstance();
+        Table table = database.getTable(database.getTableIndex(tableName));
 
-        if (!database.checkDatabase(tableName)) {
-            return output.append("Table ").append(tableName).append(" does not exist.");
-        }
-
-        Table table = database.getTable(tableName);
-
-        if (table.getRows().isEmpty()) {
-            return output.append("The table is empty and has no schema. Cannot insert into a schema-less table.");
-        }
-
-        Row referenceRow = table.getRows().values().iterator().next();
-        List<String> columnKeys = new ArrayList<>(referenceRow.getColumns().keySet());
-
-        int expectedValuesCount = columnKeys.size();
-        int providedValuesCount = commandLine.length - 2;
-
-        if (expectedValuesCount != providedValuesCount) {
-            return output.append("Column count mismatch. Expected ").append(expectedValuesCount)
-                    .append(" values, but got ").append(providedValuesCount).append(".");
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
         Row newRow = new Row();
 
-        try {
-            for (int i = 0; i < expectedValuesCount; i++) {
-                String columnKey = columnKeys.get(i);
-                String valueStr = commandLine[i + 2];
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            String columnType = table.getColumnType(i);
+            String value = (i + 2 < commandLine.length) ? commandLine[i + 2] : "null";
 
-                DataField newField = createField(valueStr, columnKey);
-                newRow.addField(columnKey, newField);
-            }
-        } catch (Exception e) {
-            return output.append("Error parsing values: ").append(e.getMessage());
-        }
-
-        int maxId = 0;
-        for (String idStr : table.getRows().keySet()) {
             try {
-                int id = Integer.parseInt(idStr);
-                if (id > maxId) {
-                    maxId = id;
-                }
-            } catch (NumberFormatException ignored) {
+                DataField field = DataField.createField(columnType, value);
+                newRow.addField(field);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to parse value '" + value + "' for column type " + columnType + ".");
             }
         }
-        String newRowId = String.valueOf(maxId + 1);
 
-        table.addRow(newRowId, newRow);
+        table.insertRow(newRow);
 
-        output.append("Successfully inserted 1 row into table ").append(tableName).append(" with ID ").append(newRowId).append(".");
-        return output;
+        return new StringBuilder("Successfully inserted 1 row into table ").append(tableName).append(".");
     }
 
-    /**
-     * The createFields method filters what field should be created based on the column under which the field is found
-     * @param string
-     * @param dataType
-     * @return Returns a newly created appropriate object.
-     */
-    private DataField createField(String string, String dataType) {
-        if (string.equalsIgnoreCase("NULL")) {
-            return new NullField();
-        }
 
-        String type = dataType.substring(dataType.indexOf("<") + 1, dataType.lastIndexOf(">"));
-        if (type.equalsIgnoreCase("Int")) {
-            return new IntField(Integer.parseInt(string));
-        } else if (type.equalsIgnoreCase("Double")) {
-            return new DoubleField(Double.parseDouble(string));
-        } else if (type.equalsIgnoreCase("String")) {
-            return new StringField(string);
-        } else {
-            throw new RuntimeException("Invalid datatype: " + type);
-        }
-    }
 }

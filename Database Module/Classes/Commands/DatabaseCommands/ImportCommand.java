@@ -11,8 +11,7 @@ import Classes.Structure.Fields.StringField;
 import Interfaces.Command;
 import Interfaces.DataField;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -29,80 +28,54 @@ public class ImportCommand implements Command {
      * @throws FileNotFoundException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException {
-
-        StringBuilder output = new StringBuilder("");
-        File openedFile = OpenCommand.getOpenedFile();
-        String fileName = openedFile.getName();
-
-        Database database = Database.getInstance();
-        String tableName = commandLine[1].substring(0,commandLine[1].indexOf("."));
-        if(database.checkDatabase(tableName)){
-            output.append("This table has already been imported");
-            return output;
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 3) {
+            throw new IllegalArgumentException("Invalid number of arguments for import command. Expected 3, got " + commandLine.length + ".");
         }
-        else if(!Objects.equals(commandLine[1], fileName)){
-            output.append("The file you have opened currently does not contain this table or the table does not exit. " +
-                            "The currently opened file contains contains table: ").append(tableName).append('\n')
-                    .append("Please import the correct table");
-            return output;
+
+        String tableName = commandLine[1];
+        String fileName = commandLine[2];
+
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
-        Table newTable = new Table(tableName);
-        Integer rowNum = 1;
-        List<String> columnNames = new ArrayList<>();
-        boolean isColumnLine = true;
 
-        try (Scanner reader = new Scanner(openedFile)){
-            while(reader.hasNextLine()){
-                String input = reader.nextLine();
-                String[] arr = input.split(" ");
+        int importedCount = 0;
 
-                if (isColumnLine){
-                    columnNames.addAll(Arrays.asList(arr));
-                    isColumnLine = false;
-                    continue;
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line = reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",", -1);
+                Row newRow = new Row();
+
+                for (int i = 0; i < table.getColumnCount(); i++) {
+                    String columnType = table.getColumnType(i);
+                    String value = (i < values.length) ? values[i].trim() : "null";
+
+                    if (value.isEmpty()) {
+                        value = "null";
+                    }
+
+                    try {
+                        DataField field = DataField.createField(columnType, value);
+                        newRow.addField(field);
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("Data format mismatch at row " + (importedCount + 1) + ".");
+                    }
                 }
-                Row row = new Row();
-                for (int i = 0; i < columnNames.size(); i++){
-                    DataField dataField = createField(arr[i],columnNames.get(i));
-                    row.addField(columnNames.get(i), dataField);
-                }
 
-                newTable.addRow(rowNum.toString(), row);
-                rowNum++;
+                table.insertRow(newRow);
+                importedCount++;
             }
-            database.addTable(newTable);
-            output.append("Table from ").append(openedFile.getName()).append(" successfully imported");
-        } catch (FileNotFoundException e){
-            throw new FileNotFoundException("File not found");
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("File not found: " + fileName);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error reading file: " + fileName);
         }
-        return output;
+
+        return new StringBuilder("Successfully imported ").append(importedCount).append(" row(s) into table ").append(tableName).append(".");
     }
 
-    /**
-     * The createFields method filters what field should be created based on the column under which the field is found
-     * @param string
-     * @param dataType
-     * @return Returns a newly created appropriate object.
-     */
-    private DataField createField(String string, String dataType) {
-        if (string.equalsIgnoreCase("NULL")) {
-            return new NullField();
-        }
-
-        DataField dataField;
-        String type = dataType.substring(dataType.indexOf("<") + 1, dataType.lastIndexOf(">"));
-
-        if (type.equalsIgnoreCase("Int")) {
-            dataField = new IntField(Integer.parseInt(string));
-        } else if (type.equalsIgnoreCase("Double")) {
-            dataField = new DoubleField(Double.parseDouble(string));
-        } else if (type.equalsIgnoreCase("String")) {
-            dataField = new StringField(string);
-        } else {
-            throw new RuntimeException("Invalid datatype");
-        }
-
-        return dataField;
-    }
 }

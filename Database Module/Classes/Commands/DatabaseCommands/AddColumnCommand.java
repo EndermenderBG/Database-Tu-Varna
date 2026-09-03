@@ -5,6 +5,8 @@ import Classes.Structure.Fields.NullField;
 import Classes.Structure.Database.Row;
 import Classes.Structure.Database.Table;
 import Interfaces.Command;
+import Interfaces.DataField;
+
 import java.io.FileNotFoundException;
 import java.util.Map;
 
@@ -21,31 +23,31 @@ public class AddColumnCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 4) {
-            return output.append("Invalid arguments. Usage: addcolumn <table name> <column name> <column type>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 4) {
+            throw new IllegalArgumentException("Invalid number of arguments for addcolumn command. Expected 4, got " + commandLine.length + ".");
         }
 
         String tableName = commandLine[1];
         String columnName = commandLine[2];
         String columnType = commandLine[3];
 
-        Database database = Database.getInstance();
-        if (!database.checkDatabase(tableName)) {
-            return output.append("Table ").append(tableName).append(" does not exist.");
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        Table table = database.getTable(tableName);
+        table.addColumn(columnName, columnType);
 
-        String fullColumnName = columnName + "<" + columnType + ">";
-
-        for (Map.Entry<String, Row> entry : table.getRows().entrySet()) {
-            entry.getValue().addField(fullColumnName, new NullField());
+        try {
+            for (int i = 0; i < table.getRowCount(); i++) {
+                Row row = table.getRow(i);
+                row.addField(DataField.createField(columnType, "null"));
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unsupported data type provided: " + columnType);
         }
 
-        output.append("Successfully added column ").append(fullColumnName).append(" to table ").append(tableName);
-        return output;
+        return new StringBuilder("Successfully added column ").append(columnName).append(" of type ").append(columnType).append(" to table ").append(tableName).append(".");
     }
 }

@@ -27,47 +27,44 @@ public class PrintCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-        Database database = Database.getInstance();
-
-        if (commandLine.length < 2){
-            return output.append("Error: Please write the table's name.");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 2) {
+            throw new IllegalArgumentException("Invalid number of arguments for print command. Expected 2, got " + commandLine.length + ".");
         }
 
         String tableName = commandLine[1];
+        Table table = database.getTable(database.getTableIndex(tableName));
 
-        if(!database.checkDatabase(tableName)){
-            return output.append("This table does not exist. You can call the <showtables> command to see what tables have been imported.");
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        Table table = database.getTables().get(tableName);
-        int pageIndex = 0;
-        Map<String, Row> rows = table.getRows();
+        StringBuilder output = new StringBuilder();
 
-        if (rows.isEmpty()) {
-            return output.append("Table '").append(tableName).append("' is currently empty.");
-        }
-
-        int totalPages = (int) Math.ceil((double) rows.size() / pageSize);
-
-        output.append("\n--- Table: ").append(tableName)
-                .append(" | Page: ").append(pageIndex + 1).append(" / ").append(totalPages).append(" ---\n");
-
-        int start = pageIndex * pageSize;
-        int end = Math.min(start + pageSize, rows.size());
-
-        List<Row> rowsList = new ArrayList<>(rows.values());
-
-        for (int i = start; i < end; i++){
-            Row row = rowsList.get(i);
-
-            StringBuilder rowString = new StringBuilder();
-            for (DataField field : row.getColumns().values()) {
-                rowString.append(String.format("%-20s", field.getAsString()));
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            output.append(table.getColumnName(i));
+            if (i < table.getColumnCount() - 1) {
+                output.append(" | ");
             }
-            output.append(rowString.toString().trim()).append("\n");
         }
+        output.append(System.lineSeparator());
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            output.append("------------");
+        }
+        output.append(System.lineSeparator());
+
+        for (int i = 0; i < table.getRowCount(); i++) {
+            Row row = table.getRow(i);
+            for (int j = 0; j < table.getColumnCount(); j++) {
+                output.append(row.getField(j).asString());
+                if (j < table.getColumnCount() - 1) {
+                    output.append(" | ");
+                }
+            }
+            output.append(System.lineSeparator());
+        }
+
         return output;
     }
 }

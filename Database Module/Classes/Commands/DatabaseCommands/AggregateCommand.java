@@ -24,111 +24,62 @@ public class AggregateCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-
-        if (commandLine.length < 6) {
-            return output.append("Invalid arguments. Usage: aggregate <table name> <search column n> <search value> <target column n> <operation>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 4) {
+            throw new IllegalArgumentException("Invalid number of arguments for aggregate command. Expected 4, got " + commandLine.length + ".");
         }
 
         String tableName = commandLine[1];
-        int searchColIndex;
-        int targetColIndex;
+        String columnName = commandLine[2];
+        String operation = commandLine[3].toLowerCase();
 
-        try {
-            searchColIndex = Integer.parseInt(commandLine[2]);
-            targetColIndex = Integer.parseInt(commandLine[4]);
-        } catch (NumberFormatException e) {
-            return output.append("Column indices must be integers.");
+        Table table = database.getTable(database.getTableIndex(tableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
         }
 
-        String searchValue = commandLine[3];
-        String operation = commandLine[5].toLowerCase();
-
-        Database database = Database.getInstance();
-
-        if (!database.checkDatabase(tableName)) {
-            return output.append("Table ").append(tableName).append(" does not exist.");
+        int columnIndex = table.getColumnIndex(columnName);
+        if (columnIndex == -1) {
+            throw new IllegalArgumentException("Column with name " + columnName + " not found in table " + tableName + ".");
         }
 
-        Table table = database.getTable(tableName);
-
-        if (table.getRows().isEmpty()) {
-            return output.append("The table is empty. Cannot perform aggregation.");
-        }
-
-        Row firstRow = table.getRows().values().iterator().next();
-        List<String> columnKeys = new ArrayList<>(firstRow.getColumns().keySet());
-
-        if (searchColIndex < 1 || searchColIndex > columnKeys.size() || targetColIndex < 1 || targetColIndex > columnKeys.size()) {
-            return output.append("Column index out of bounds.");
-        }
-
-        String searchColKey = columnKeys.get(searchColIndex - 1);
-        String targetColKey = columnKeys.get(targetColIndex - 1);
-
-        String targetType = targetColKey.substring(targetColKey.indexOf("<") + 1, targetColKey.lastIndexOf(">"));
-        if (!targetType.equalsIgnoreCase("Int") && !targetType.equalsIgnoreCase("Double")) {
-            return output.append("Error: Aggregation operations can only be performed on numeric columns (Int or Double). Target column type is ").append(targetType).append(".");
-        }
-
-        double sum = 0;
-        double product = 1;
-        double max = -Double.MAX_VALUE;
-        double min = Double.MAX_VALUE;
+        double result = 0;
         int count = 0;
+        boolean first = true;
 
-        for (Row row : table.getRows().values()) {
-            DataField searchField = row.getField(searchColKey);
+        for (int i = 0; i < table.getRowCount(); i++) {
+            Row row = table.getRow(i);
+            DataField field = row.getField(columnIndex);
 
-            if (searchField != null && searchField.getAsString().equals(searchValue)) {
-                DataField targetField = row.getField(targetColKey);
-
-                if (targetField != null && !targetField.getAsString().equals("NULL")) {
-                    double val;
-                    try {
-                        val = Double.parseDouble(targetField.getAsString());
-                    } catch (NumberFormatException e) {
-                        continue;
-                    }
-
-                    sum += val;
-                    product *= val;
-                    if (val > max) max = val;
-                    if (val < min) min = val;
-                    count++;
+            if (!field.isNull()) {
+                double value;
+                try {
+                    value = Double.parseDouble(field.asString());
+                } catch (NumberFormatException e) {
+                    continue;
                 }
+
+                if (operation.equals("sum") || operation.equals("avg")) {
+                    result += value;
+                } else if (operation.equals("min")) {
+                    if (first || value < result) result = value;
+                } else if (operation.equals("max")) {
+                    if (first || value > result) result = value;
+                }
+
+                first = false;
+                count++;
             }
         }
 
         if (count == 0) {
-            return output.append("No valid numeric data found for the given search criteria to perform the aggregation.");
+            return new StringBuilder("No valid numeric values found to aggregate in column ").append(columnName).append(".");
         }
 
-        double resultValue = 0;
-        switch (operation) {
-            case "sum":
-                resultValue = sum;
-                break;
-            case "product":
-                resultValue = product;
-                break;
-            case "maximum":
-                resultValue = max;
-                break;
-            case "minimum":
-                resultValue = min;
-                break;
-            default:
-                return output.append("Unknown operation '").append(operation).append("'. Supported operations are: sum, product, maximum, minimum.");
+        if (operation.equals("avg")) {
+            result = result / count;
         }
 
-        String formattedResult = (resultValue % 1 == 0) ? String.valueOf((long) resultValue) : String.valueOf(resultValue);
-
-        output.append("The ").append(operation).append(" of column ").append(targetColIndex)
-                .append(" where column ").append(searchColIndex).append(" equals '").append(searchValue)
-                .append("' is ").append(formattedResult).append(".");
-
-        return output;
+        return new StringBuilder("Aggregation result (").append(operation).append("): ").append(result);
     }
 }

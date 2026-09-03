@@ -33,6 +33,10 @@ public class Table {
         return -1;
     }
 
+    public String getColumnName(int colIndex){
+        return columns.get(colIndex).getName();
+    }
+
     public String getColumnType(int colIndex){
         return columns.get(colIndex).getType();
     }
@@ -41,6 +45,7 @@ public class Table {
         if(row.size() != columns.size()){
             throw new IllegalArgumentException("Row width does not match column amount.");
         }
+        rows.add(row);
     }
 
     public void insertRowAt(int rowIndex, Row row){
