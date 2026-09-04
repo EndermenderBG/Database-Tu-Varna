@@ -33,6 +33,10 @@ public class Database {
         return -1;
     }
 
+    public int getTableCount(){
+        return tables.size();
+    }
+
     public Table searchTableByName(String name){
         int index = getTableIndex(name);
         if (index == -1){

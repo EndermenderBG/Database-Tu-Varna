@@ -21,22 +21,28 @@ public class DescribeCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        Database database = Database.getInstance();
-        String tableName = commandLine[1];
-        StringBuilder output;
-        if(!database.checkDatabase(tableName)){
-            output = new StringBuilder("This table does not exit. You can call the <showtables> command to see what tables have been imported.");
-            return output;
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 2) {
+            throw new IllegalArgumentException("Invalid number of arguments for describe command. Expected 2, got " + commandLine.length + ".");
         }
-        Table chosenTable = database.getTables().get(tableName);
-        ArrayList<String> columnList = new ArrayList<>(chosenTable.getRow("1").getColumns().keySet());
-        output = new StringBuilder("The columns (attributes) of this table and their types are: ").append("\n");
-        for (int i = 0; i < columnList.size(); i++) {
-            String columnFull = columnList.get(i);
-            String columnType = columnFull.substring(columnFull.indexOf("<")+1,columnFull.lastIndexOf(">"));
-            String columnName = columnFull.substring(0,columnFull.indexOf("<"));
-            output.append(columnName).append(" | ").append(columnType).append("\n");
+
+        String tableName = commandLine[1];
+        Table table = database.getTable(database.getTableIndex(tableName));
+
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + tableName + " not found.");
+        }
+
+        if (table.getColumnCount() == 0) {
+            return new StringBuilder("Table ").append(tableName).append(" has no columns.");
+        }
+
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            output.append(table.getColumnName(i))
+                    .append(": ")
+                    .append(table.getColumnType(i))
+                    .append(System.lineSeparator());
         }
 
         return output;

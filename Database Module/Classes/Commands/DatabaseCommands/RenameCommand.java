@@ -18,32 +18,21 @@ public class RenameCommand implements Command {
      * @throws InterruptedException
      */
     @Override
-    public StringBuilder execute(Database database,String[] commandLine) throws FileNotFoundException, InterruptedException {
-        StringBuilder output = new StringBuilder();
-        if (commandLine.length < 3) {
-            return output.append("Invalid arguments. Usage: rename <old name> <new name>");
+    public StringBuilder execute(Database database, String[] commandLine) throws FileNotFoundException, InterruptedException {
+        if (commandLine.length != 3) {
+            throw new IllegalArgumentException("Invalid number of arguments for rename command. Expected 3, got " + commandLine.length + ".");
         }
 
-        String oldName = commandLine[1];
-        String newName = commandLine[2];
+        String oldTableName = commandLine[1];
+        String newTableName = commandLine[2];
 
-        Database database = Database.getInstance();
-
-        if (!database.checkDatabase(oldName)) {
-            return output.append("Table ").append(oldName).append(" does not exist.");
+        Table table = database.getTable(database.getTableIndex(oldTableName));
+        if (table == null) {
+            throw new IllegalArgumentException("Table with name " + oldTableName + " not found.");
         }
 
-        if (database.checkDatabase(newName)) {
-            return output.append("Error: A table with the name ").append(newName).append(" already exists. The new name must be unique.");
-        }
+        table.setName(newTableName);
 
-        Table table = database.getTable(oldName);
-        table.setName(newName);
-
-        database.getTables().remove(oldName);
-        database.addTable(table);
-
-        output.append("Successfully renamed table ").append(oldName).append(" to ").append(newName).append(".");
-        return output;
+        return new StringBuilder("Successfully renamed table ").append(oldTableName).append(" to ").append(newTableName).append(".");
     }
 }

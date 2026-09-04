@@ -20,6 +20,10 @@ public class Table {
         return this.name;
     }
 
+    public void setName(String newName){
+        this.name = newName;
+    }
+
     public void addColumn(String colName, String colType) {
         columns.add(new Column(colName, colType));
     }
